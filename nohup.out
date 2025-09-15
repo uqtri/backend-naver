@@ -1,0 +1,69 @@
+Server is listening on port 5000
+node:events:489
+      throw er; // Unhandled 'error' event
+      ^
+
+Error: listen EADDRINUSE: address already in use :::5005
+    at Server.setupListenHandle [as _listen2] (node:net:1812:16)
+    at listenInCluster (node:net:1860:12)
+    at Server.listen (node:net:1948:7)
+    at Function.listen (/home/triuq/backend-naver/backend-naver/node_modules/express/lib/application.js:635:24)
+    at file:///home/triuq/backend-naver/backend-naver/server.js:38:5
+    at ModuleJob.run (node:internal/modules/esm/module_job:192:25)
+Emitted 'error' event on Server instance at:
+    at emitErrorNT (node:net:1839:8)
+    at process.processTicksAndRejections (node:internal/process/task_queues:82:21) {
+  code: 'EADDRINUSE',
+  errno: -98,
+  syscall: 'listen',
+  address: '::',
+  port: 5005
+}
+
+Node.js v20.0.0
+[0mGET /api/priorities [32m200[0m 281.180 ms - 164[0m
+[0mGET /api/priorities [32m200[0m 4.153 ms - 164[0m
+node:events:489
+      throw er; // Unhandled 'error' event
+      ^
+
+Error: listen EADDRINUSE: address already in use :::5005
+    at Server.setupListenHandle [as _listen2] (node:net:1812:16)
+    at listenInCluster (node:net:1860:12)
+    at Server.listen (node:net:1948:7)
+    at Function.listen (/home/triuq/backend-naver/backend-naver/node_modules/express/lib/application.js:635:24)
+    at file:///home/triuq/backend-naver/backend-naver/server.js:39:5
+    at ModuleJob.run (node:internal/modules/esm/module_job:192:25)
+Emitted 'error' event on Server instance at:
+    at emitErrorNT (node:net:1839:8)
+    at process.processTicksAndRejections (node:internal/process/task_queues:82:21) {
+  code: 'EADDRINUSE',
+  errno: -98,
+  syscall: 'listen',
+  address: '::',
+  port: 5005
+}
+
+Node.js v20.0.0
+node:events:489
+      throw er; // Unhandled 'error' event
+      ^
+
+Error: listen EADDRINUSE: address already in use :::5005
+    at Server.setupListenHandle [as _listen2] (node:net:1812:16)
+    at listenInCluster (node:net:1860:12)
+    at Server.listen (node:net:1948:7)
+    at Function.listen (/home/triuq/backend-naver/backend-naver/node_modules/express/lib/application.js:635:24)
+    at file:///home/triuq/backend-naver/backend-naver/server.js:39:5
+    at ModuleJob.run (node:internal/modules/esm/module_job:192:25)
+Emitted 'error' event on Server instance at:
+    at emitErrorNT (node:net:1839:8)
+    at process.processTicksAndRejections (node:internal/process/task_queues:82:21) {
+  code: 'EADDRINUSE',
+  errno: -98,
+  syscall: 'listen',
+  address: '::',
+  port: 5005
+}
+
+Node.js v20.0.0

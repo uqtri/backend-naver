@@ -20,6 +20,7 @@ app.use(
       "http://localhost:5174",
       "https://jewelry-store-qk81.vercel.app",
       "https://frontend-naverx.vercel.app/",
+      
     ],
     credentials: true,
   })
