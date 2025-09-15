@@ -13,32 +13,46 @@ model User {
   email     String   @unique
   password  String
   name      String?
+  role      String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   sessions  Session[]
+  feedbacks Feedback[]
+  currentSession CurrentSession?
+  sessionIntervals SessionInterval[]
 }
 model Subject {
   id        Int      @id @default(autoincrement())
-  name      String   @unique
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  label      String   @unique
+  subjects  Session[]
 }
 model Priority {
   id        Int      @id @default(autoincrement())
-  level     String   @unique
-  Sessions  Session[]
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  label     String   @unique
+  value     Int
+  sessions  Session[]
 }
 model Session {
   id        Int      @id @default(autoincrement())
-  token     String   @unique
+  title     String
+  description String?
+  minutes   Int
+  status    String @default("Upcoming")
+  totalMinutes Int @default(0)
+  deadline  String
   userId    Int
   user      User     @relation(fields: [userId], references: [id])
   priorityId Int
   priority   Priority @relation(fields: [priorityId], references: [id])
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  tags      Tag[] 
+  subjectId Int
+  subject   Subject  @relation(fields: [subjectId], references: [id])
+  currentSession CurrentSession?
+  pause Boolean @default(false)
+  intervals SessionInterval[]
+
 }
 model Feedback {
   id        Int      @id @default(autoincrement())
@@ -47,4 +61,31 @@ model Feedback {
   user      User     @relation(fields: [userId], references: [id])
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+model Tag {
+  id        Int      @id @default(autoincrement())
+  label     String   @unique
+  sessions  Session[]
+}
+
+model CurrentSession {
+  id        Int      @id @default(autoincrement())
+  sessionId Int @unique
+  session   Session  @relation(fields: [sessionId], references: [id])
+  userId    Int @unique
+  user      User     @relation(fields: [userId], references: [id])
+  startedAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+
+model SessionInterval {
+  id        Int      @id @default(autoincrement())
+  sessionId Int
+  session   Session  @relation(fields: [sessionId], references: [id])
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id])
+  startTime String
+  endTime   String?
+  createdAt DateTime @default(now())
 }

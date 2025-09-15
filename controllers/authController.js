@@ -11,19 +11,10 @@ import {
   sendVerificationEmail,
   sendResetPasswordEmail,
 } from "../config/nodemailer.js";
-
+import jwt from "jsonwebtoken";
 export const getAllUsers = async (req, res) => {
   try {
-    const {
-      username,
-      email,
-      fullname,
-      phone_number,
-      sortBy,
-      sortOrder,
-      page = 1,
-      limit = 6,
-    } = req.query;
+    const { email, sortBy, sortOrder, page = 1, limit = 6 } = req.query;
 
     const pageNumber = parseInt(page);
     const limitNumber = parseInt(limit);
@@ -133,27 +124,13 @@ export const getUser = async (req, res) => {
 };
 
 export const getUserById = async (req, res) => {
-  const user_id = req.params.id;
+  const userId = req.params.id;
   try {
-    const user = await prisma.users.findUnique({
+    const user = await prisma.user.findUnique({
       omit: {
         password: true,
       },
-      where: { user_id },
-      include: {
-        sales_orders: true,
-        service_orders: {
-          include: {
-            service_order_details: {
-              include: {
-                service: true,
-              },
-            },
-          },
-        },
-        service_orders: true,
-        carts: { include: { cart_details: { include: { product: true } } } },
-      },
+      where: { userId },
     });
 
     if (user) {
@@ -162,7 +139,7 @@ export const getUserById = async (req, res) => {
 
     return res.status(404).json({ success: false, message: "User not found" });
   } catch (error) {
-    console.log("Error get user: ", error);
+    // console.log("Error get user: ", error);
     return res
       .status(500)
       .json({ success: false, message: "Internal Server Error" });
@@ -173,7 +150,7 @@ export const updateUser = async (req, res) => {
   const user_id = req.user_id;
   const file = req.file;
   const data = req.body;
-  console.log("Update user data:", user_id);
+  // console.log("Update user data:", user_id);
 
   if (file) {
     const profileBase64String = `data:${
@@ -226,45 +203,27 @@ export const signUp = async (req, res) => {
 
     await signUpValidator.validateAsync(data);
 
-    const [checkUsername, checkEmail, checkPhoneNumber] = await Promise.all([
-      await prisma.users.findUnique({ where: { username: data.username } }),
-      await prisma.users.findUnique({ where: { email: data.email } }),
-      await prisma.users.findUnique({
-        where: { phone_number: data.phone_number },
-      }),
+    const [checkEmail] = await Promise.all([
+      await prisma.user.findUnique({ where: { email: data.email } }),
     ]);
-
+    console.log(checkEmail, "###");
     if (checkEmail) {
       return res
         .status(409)
         .json({ success: false, message: "Email đã tồn tại." });
     }
 
-    if (checkUsername) {
-      return res
-        .status(409)
-        .json({ success: false, message: "Tên đăng nhập đã tồn tại." });
-    }
-
-    if (checkPhoneNumber) {
-      return res
-        .status(409)
-        .json({ success: false, message: "Số điện thoại đã tồn tại." });
-    }
-
     const hashedPassword = await bcrypt.hash(data.password, 10);
 
-    const newUser = await prisma.users.create({
+    const newUser = await prisma.user.create({
       data: {
-        username: data.username,
-        phone_number: data.phone_number,
         email: data.email,
         password: hashedPassword,
         role: data.role ? data.role : "USER",
       },
     });
 
-    generateTokenAndSetCookie(newUser.user_id, newUser.role, res);
+    generateTokenAndSetCookie(newUser.userId, newUser.email, newUser.role, res);
 
     return res
       .status(200)
@@ -273,7 +232,7 @@ export const signUp = async (req, res) => {
     if (error.isJoi) {
       return res.status(400).json({
         success: false,
-        message: error.details.map((err) => err.message),
+        message: error.details[0].message,
       });
     }
     console.log("Error signing up: ", error);
@@ -285,6 +244,18 @@ export const signUp = async (req, res) => {
 
 export const signIn = async (req, res) => {
   const { identifier, password } = req.body;
+  const jwtCookie = req.cookies.jwt;
+
+  if (jwtCookie) {
+    console.log(
+      process.env.JWT_SECRET,
+      jwt.verify(jwtCookie, process.env.JWT_SECRET)
+    );
+    if (jwt.verify(jwtCookie, process.env.JWT_SECRET)) {
+      const payload = jwt.decode(jwtCookie);
+      return res.status(200).json({ success: true, data: payload });
+    }
+  }
   try {
     if (!identifier || !password) {
       return res.status(400).json({
@@ -293,12 +264,12 @@ export const signIn = async (req, res) => {
       });
     }
 
-    const user = await prisma.users.findFirst({
+    const user = await prisma.user.findFirst({
       where: {
         OR: [
           { email: identifier },
-          { phone_number: identifier },
-          { username: identifier },
+          // { phone_number: identifier },
+          // { username: identifier },
         ],
       },
     });
@@ -314,16 +285,13 @@ export const signIn = async (req, res) => {
       return res.status(406).json({ success: false, message: "Sai mật khẩu" });
     }
 
-    generateTokenAndSetCookie(user.user_id, user.role, res);
-
-    return res.json({
+    generateTokenAndSetCookie(user.id, user.email, user.role, res);
+    console.log("User signed in:", user.userId, user.email, user.role);
+    return res.status(200).json({
       success: true,
       data: {
         username: user.username,
-        fullname: user.fullname,
         email: user.email,
-        phone_number: user.phone_number,
-        profile_pic: user.profile_pic,
         role: user.role,
       },
     });
@@ -366,16 +334,16 @@ export const signOut = async (req, res) => {
 };
 
 export const getVerificationToken = async (req, res) => {
-  const { user_id } = req;
+  const { userId } = req;
   try {
-    const user = await prisma.users.findUnique({ where: { user_id } });
+    const user = await prisma.users.findUnique({ where: { userId } });
 
     if (user) {
       if (!user.is_verified) {
         const verification_token = generateToken();
 
         await prisma.users.update({
-          where: { user_id },
+          where: { userId },
           data: {
             verification_token: verification_token,
             verification_token_expires_at: new Date(
@@ -546,7 +514,7 @@ export const banUser = async (req, res) => {
       .status(200)
       .json({ success: true, message: "Ban user successfully" });
   } catch (error) {
-    console.log("Error ban user:", error);
+    // console.log("Error ban user:", error);
     return res
       .status(500)
       .json({ success: false, message: "Internal Server Error" });

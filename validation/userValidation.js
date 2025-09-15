@@ -1,12 +1,12 @@
 import Joi from "@hapi/joi";
 
 export const signUpValidator = Joi.object({
-  username: Joi.string().alphanum().min(6).max(20).required().messages({
-    "any.required": "Tên đăng nhập là bắt buộc",
-    "string.empty": "Tên đăng nhập không được để trống",
-    "string.min": "Tên đăng nhập phải có ít nhất 6 ký tự",
-    "string.max": "Tên đăng nhập không được vượt quá 20 ký tự",
-  }),
+  // username: Joi.string().alphanum().min(6).max(20).required().messages({
+  //   "any.required": "Tên đăng nhập là bắt buộc",
+  //   "string.empty": "Tên đăng nhập không được để trống",
+  //   "string.min": "Tên đăng nhập phải có ít nhất 6 ký tự",
+  //   "string.max": "Tên đăng nhập không được vượt quá 20 ký tự",
+  // }),
   email: Joi.string()
     .email({
       minDomainSegments: 2,
@@ -21,19 +21,6 @@ export const signUpValidator = Joi.object({
       "string.email": "Email không hợp lệ",
       "any.required": "Email là bắt buộc",
       "string.pattern.base": "Email không hợp lệ",
-    }),
-  phone_number: Joi.string()
-    .required()
-    .pattern(/^[0-9\s]+$/)
-    .min(8)
-    .max(12)
-    .allow("")
-    .messages({
-      "any.required": "Số điện thoại là bắt buộc",
-      "string.empty": "Số điện thoại không được để trống",
-      "string.pattern.base": "Số điện thoại không hợp lệ",
-      "string.min": "Số điện thoại phải có ít nhất 8 chữ số",
-      "string.max": "Số điện thoại không được vượt quá 12 chữ số",
     }),
   password: Joi.string()
     .pattern(new RegExp("^[a-zA-Z0-9]{3,30}$"))

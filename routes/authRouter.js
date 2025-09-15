@@ -34,7 +34,7 @@ router.get(
   passport.authenticate("google", {
     scope: ["profile", "email"],
     session: false,
-  }),
+  })
 );
 
 // Route callback sau khi Google xác thực
